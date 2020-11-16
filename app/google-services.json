@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "795662923507",
+    "firebase_url": "https://cryptoctf-c576c.firebaseio.com",
+    "project_id": "cryptoctf-c576c",
+    "storage_bucket": "cryptoctf-c576c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795662923507:android:df9d4eaf8cb14212df2986",
+        "android_client_info": {
+          "package_name": "com.add.cryptoctf"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795662923507-f3ltg90eguffle4hnggv0q0m6n3t3fq0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCk0XjyT_2J6aKKkfWlPBEvUS93b5vs8oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "795662923507-f3ltg90eguffle4hnggv0q0m6n3t3fq0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
