@@ -41,7 +41,16 @@ public class TaskFragment extends Fragment {
         tasks.add(new Task("Line 1", "63"));
         tasks.add(new Task("Line 1", "63"));
         tasks.add(new Task("Line 1", "63"));
-        
+        tasks.add(new Task("Line 1", "63"));
+        tasks.add(new Task("Line 1", "63"));
+        tasks.add(new Task("Line 1", "63"));
+        tasks.add(new Task("Line 1", "63"));
+        tasks.add(new Task("Line 1", "63"));
+        tasks.add(new Task("Line 1", "63"));
+
+
+
+
 
         mRecyclerView = view.findViewById(R.id.rv);
         mRecyclerView.setHasFixedSize(true);
