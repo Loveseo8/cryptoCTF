@@ -1,11 +1,16 @@
 package com.add.cryptoctf.ui.task;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +19,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.add.cryptoctf.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +45,8 @@ public class TaskFragment extends Fragment {
     String ID_POINTS = "points";
     String ID_ANSWER = "answer";
     String ID_TASK = "task";
+    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    FirebaseUser user = firebaseAuth.getCurrentUser();
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -69,23 +78,24 @@ public class TaskFragment extends Fragment {
                     String points = ds.child("points").getValue().toString();
                     String answer = ds.child("answer").getValue().toString();
                     String task = ds.child("task").getValue().toString();
+
                     SharedPreferences.Editor ed = sharedPreferencestitle.edit();
                     ed.putString(ID_TITLE, title);
                     ed.commit();
 
                     SharedPreferences.Editor eg = sharedPreferenceanswer.edit();
-                    eg.putString(ID_ANSWER, title);
+                    eg.putString(ID_ANSWER, answer);
                     eg.commit();
 
                     SharedPreferences.Editor em = sharedPreferencetask.edit();
-                    em.putString(ID_TASK, title);
+                    em.putString(ID_TASK, task);
                     em.commit();
 
                     SharedPreferences.Editor es = sharedPreferencespoints.edit();
                     es.putString(ID_POINTS, points);
                     es.commit();
 
-                        tasks.add(new Task(sharedPreferencestitle.getString(ID_TITLE, ""), sharedPreferencespoints.getString(ID_POINTS, ""), sharedPreferencestitle.getString(ID_TASK, ""), sharedPreferencestitle.getString(ID_ANSWER, "")));
+                        tasks.add(new Task(sharedPreferencestitle.getString(ID_TITLE, ""), sharedPreferencespoints.getString(ID_POINTS, ""), sharedPreferencetask.getString(ID_TASK, ""), sharedPreferenceanswer.getString(ID_ANSWER, "")));
 
                 }
 
@@ -105,6 +115,7 @@ public class TaskFragment extends Fragment {
         mAdapter = new TaskAdapter(tasks);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+
         mAdapter.setOnItemClickListener(new TaskAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
@@ -116,9 +127,49 @@ public class TaskFragment extends Fragment {
 
     public void showTaskDialog(Task task){
 
-        
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+        LayoutInflater layoutInflater = getLayoutInflater();
+        final View dialogView = layoutInflater.inflate(R.layout.task_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText entertask = dialogView.findViewById(R.id.enterflag);
+        final TextView tasktext = dialogView.findViewById(R.id.task_text);
+        final Button submitflag = dialogView.findViewById(R.id.submit);
+
+        tasktext.setText(task.getTask());
+
+        dialogBuilder.setTitle(task.getTitle());
+        final AlertDialog b = dialogBuilder.create();
+        b.show();
+
+        submitflag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                String text_word = entertask.getText().toString().trim();
+
+                if (TextUtils.isEmpty(text_word)) {
+
+                    entertask.setError("Enter flag!");
+                    entertask.requestFocus();
+
+                } else {
+
+                    if(text_word.equals(task.getAnswer())){
+
+
+                    }
+                }
+
+                b.dismiss();
+
+            }
+
+        });
 
     }
+
 }
 
 class Task {
