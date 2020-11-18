@@ -91,7 +91,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 user = FirebaseAuth.getInstance().getCurrentUser();
 
-                                userName.child(user.getUid()).child("nickname").setValue(nickname.getText().toString().trim());
+                                userName.child(user.getUid()).child("name").setValue(nickname.getText().toString().trim());
+                                userName.child(user.getUid()).child("score").setValue(0);
 
                                 Intent i = new Intent(RegisterActivity.this, LoginActivity.class);
                                 startActivity(i);

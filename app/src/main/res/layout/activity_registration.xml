@@ -65,7 +65,7 @@
         android:id="@+id/register_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign IN"
+        android:text="Sign UP"
         android:layout_margin="15dp"/>
 
     <TextView

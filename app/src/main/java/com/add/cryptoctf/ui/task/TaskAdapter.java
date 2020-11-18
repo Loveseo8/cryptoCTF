@@ -1,12 +1,9 @@
 package com.add.cryptoctf.ui.task;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,7 +11,7 @@ import com.add.cryptoctf.R;
 
 import java.util.List;
 
-public class ExampleAdapter extends RecyclerView.Adapter<ExampleAdapter.ExampleViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ExampleViewHolder> {
 
     private List<Task> tasks;
     private OnItemClickListener mListener;
@@ -50,7 +47,7 @@ public class ExampleAdapter extends RecyclerView.Adapter<ExampleAdapter.ExampleV
         });
     }
 }
-    public ExampleAdapter(List<Task> tasks) {
+    public TaskAdapter(List<Task> tasks) {
         this.tasks = tasks;
     }
     @Override
@@ -63,7 +60,7 @@ public class ExampleAdapter extends RecyclerView.Adapter<ExampleAdapter.ExampleV
     public void onBindViewHolder(ExampleViewHolder holder, int position) {
         Task currentItem = tasks.get(position);
         holder.titlel.setText(currentItem.title);
-        holder.pointss.setText(currentItem.points);
+        holder.pointss.setText(currentItem.points + " points");
     }
     @Override
     public int getItemCount() {
