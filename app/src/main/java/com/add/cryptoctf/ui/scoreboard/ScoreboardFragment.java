@@ -39,7 +39,6 @@ public class ScoreboardFragment extends Fragment {
     String ID_NICKNAME = "nickname";
     String ID_score = "score";
     String ID_userscore = "userscore";
-    DatabaseReference userScore;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private FirebaseUser user = firebaseAuth.getCurrentUser();
     TextView uscore;

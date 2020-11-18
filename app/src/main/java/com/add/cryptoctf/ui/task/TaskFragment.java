@@ -45,7 +45,11 @@ public class TaskFragment extends Fragment {
     String ID_POINTS = "points";
     String ID_ANSWER = "answer";
     String ID_TASK = "task";
-    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    String ID_userscore = "userscore";
+    SharedPreferences sharedPreferencesuser;
+    String oldscore;
+    DatabaseReference userReference;
+    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     FirebaseUser user = firebaseAuth.getCurrentUser();
 
 
@@ -60,8 +64,17 @@ public class TaskFragment extends Fragment {
 
         sharedPreferencestitle = getActivity().getSharedPreferences(ID_TITLE, Context.MODE_PRIVATE);
         sharedPreferencespoints = getActivity().getSharedPreferences(ID_POINTS, Context.MODE_PRIVATE);
-        sharedPreferenceanswer = getActivity().getSharedPreferences(ID_POINTS, Context.MODE_PRIVATE);
-        sharedPreferencetask = getActivity().getSharedPreferences(ID_POINTS, Context.MODE_PRIVATE);
+        sharedPreferenceanswer = getActivity().getSharedPreferences(ID_ANSWER, Context.MODE_PRIVATE);
+        sharedPreferencetask = getActivity().getSharedPreferences(ID_TASK, Context.MODE_PRIVATE);
+        sharedPreferencesuser = getActivity().getSharedPreferences(ID_userscore, Context.MODE_PRIVATE);
+
+        userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("score");
+
+        if(sharedPreferencesuser.contains(ID_userscore)){
+
+            oldscore = sharedPreferencesuser.getString(ID_userscore, "");
+
+        }
 
 
         tasksReference = FirebaseDatabase.getInstance().getReference("Tasks");
@@ -158,6 +171,7 @@ public class TaskFragment extends Fragment {
 
                     if(text_word.equals(task.getAnswer())){
 
+                        userReference.setValue(Integer.parseInt(oldscore) + Integer.parseInt(task.getPoints()));
 
                     }
                 }
