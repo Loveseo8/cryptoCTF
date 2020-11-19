@@ -2,6 +2,7 @@ package com.add.cryptoctf.ui.task;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,7 +20,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.add.cryptoctf.LoginActivity;
+import com.add.cryptoctf.MainActivity2;
 import com.add.cryptoctf.R;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,7 +46,9 @@ public class TaskFragment extends Fragment {
     SharedPreferences sharedPreferencespoints;
     SharedPreferences sharedPreferenceanswer;
     SharedPreferences sharedPreferencetask;
+    SharedPreferences sharedPreferencecompleted;
     String ID_TITLE = "title";
+    String ID_COMPLETED = "completed";
     String ID_POINTS = "points";
     String ID_ANSWER = "answer";
     String ID_TASK = "task";
@@ -62,129 +69,156 @@ public class TaskFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        sharedPreferencestitle = getActivity().getSharedPreferences(ID_TITLE, Context.MODE_PRIVATE);
-        sharedPreferencespoints = getActivity().getSharedPreferences(ID_POINTS, Context.MODE_PRIVATE);
-        sharedPreferenceanswer = getActivity().getSharedPreferences(ID_ANSWER, Context.MODE_PRIVATE);
-        sharedPreferencetask = getActivity().getSharedPreferences(ID_TASK, Context.MODE_PRIVATE);
-        sharedPreferencesuser = getActivity().getSharedPreferences(ID_userscore, Context.MODE_PRIVATE);
+            sharedPreferencestitle = getActivity().getSharedPreferences(ID_TITLE, Context.MODE_PRIVATE);
+            sharedPreferencespoints = getActivity().getSharedPreferences(ID_POINTS, Context.MODE_PRIVATE);
+            sharedPreferenceanswer = getActivity().getSharedPreferences(ID_ANSWER, Context.MODE_PRIVATE);
+            sharedPreferencetask = getActivity().getSharedPreferences(ID_TASK, Context.MODE_PRIVATE);
+            sharedPreferencesuser = getActivity().getSharedPreferences(ID_userscore, Context.MODE_PRIVATE);
+            sharedPreferencecompleted = getActivity().getSharedPreferences(ID_COMPLETED, Context.MODE_PRIVATE);
 
-        userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("score");
-
-        if(sharedPreferencesuser.contains(ID_userscore)){
-
-            oldscore = sharedPreferencesuser.getString(ID_userscore, "");
-
-        }
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("score");
 
 
-        tasksReference = FirebaseDatabase.getInstance().getReference("Tasks");
+            if (sharedPreferencesuser.contains(ID_userscore)) {
 
-        tasksReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                oldscore = sharedPreferencesuser.getString(ID_userscore, "");
 
-                tasks.clear();
+            }
 
-                for(DataSnapshot ds : snapshot.getChildren()){
 
-                    String title = ds.child("title").getValue().toString();
-                    String points = ds.child("points").getValue().toString();
-                    String answer = ds.child("answer").getValue().toString();
-                    String task = ds.child("task").getValue().toString();
+            tasksReference = FirebaseDatabase.getInstance().getReference("Tasks");
 
-                    SharedPreferences.Editor ed = sharedPreferencestitle.edit();
-                    ed.putString(ID_TITLE, title);
-                    ed.commit();
+            tasksReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    SharedPreferences.Editor eg = sharedPreferenceanswer.edit();
-                    eg.putString(ID_ANSWER, answer);
-                    eg.commit();
+                    tasks.clear();
 
-                    SharedPreferences.Editor em = sharedPreferencetask.edit();
-                    em.putString(ID_TASK, task);
-                    em.commit();
+                    for (DataSnapshot ds : snapshot.getChildren()) {
 
-                    SharedPreferences.Editor es = sharedPreferencespoints.edit();
-                    es.putString(ID_POINTS, points);
-                    es.commit();
+                        String title = ds.child("title").getValue().toString();
+                        String points = ds.child("points").getValue().toString();
+                        String answer = ds.child("answer").getValue().toString();
+                        String task = ds.child("task").getValue().toString();
+
+                        SharedPreferences.Editor ed = sharedPreferencestitle.edit();
+                        ed.putString(ID_TITLE, title);
+                        ed.commit();
+
+                        SharedPreferences.Editor eg = sharedPreferenceanswer.edit();
+                        eg.putString(ID_ANSWER, answer);
+                        eg.commit();
+
+                        SharedPreferences.Editor em = sharedPreferencetask.edit();
+                        em.putString(ID_TASK, task);
+                        em.commit();
+
+                        SharedPreferences.Editor es = sharedPreferencespoints.edit();
+                        es.putString(ID_POINTS, points);
+                        es.commit();
 
                         tasks.add(new Task(sharedPreferencestitle.getString(ID_TITLE, ""), sharedPreferencespoints.getString(ID_POINTS, ""), sharedPreferencetask.getString(ID_TASK, ""), sharedPreferenceanswer.getString(ID_ANSWER, "")));
 
+                    }
+
+                    mAdapter.notifyDataSetChanged();
+
                 }
 
-                mAdapter.notifyDataSetChanged();
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
+                }
+            });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            mRecyclerView = view.findViewById(R.id.rv);
+            mRecyclerView.setHasFixedSize(true);
+            mLayoutManager = new LinearLayoutManager(getContext());
+            mAdapter = new TaskAdapter(tasks);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            mRecyclerView.setAdapter(mAdapter);
 
-            }
-        });
+            mAdapter.setOnItemClickListener(new TaskAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(int position) {
+                    Task task1 = tasks.get(position);
 
-        mRecyclerView = view.findViewById(R.id.rv);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getContext());
-        mAdapter = new TaskAdapter(tasks);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+                    String[] com = sharedPreferencecompleted.getString(ID_COMPLETED, "").trim().split(" ");
+                    int count = 0;
+                    for (int i = 0; i < com.length; i++)
+                        if (com[i].contains(task1.getTitle())) count++;
 
-        mAdapter.setOnItemClickListener(new TaskAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                Task task1 = tasks.get(position);
-                showTaskDialog(task1);
-            }
-        });
-    }
+                    if (count == 0) showTaskDialog(task1);
+                    else {
 
-    public void showTaskDialog(Task task){
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
-        LayoutInflater layoutInflater = getLayoutInflater();
-        final View dialogView = layoutInflater.inflate(R.layout.task_dialog, null);
-        dialogBuilder.setView(dialogView);
-
-        final EditText entertask = dialogView.findViewById(R.id.enterflag);
-        final TextView tasktext = dialogView.findViewById(R.id.task_text);
-        final Button submitflag = dialogView.findViewById(R.id.submit);
-
-        tasktext.setText(task.getTask());
-
-        dialogBuilder.setTitle(task.getTitle());
-        final AlertDialog b = dialogBuilder.create();
-        b.show();
-
-        submitflag.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                String text_word = entertask.getText().toString().trim();
-
-                if (TextUtils.isEmpty(text_word)) {
-
-                    entertask.setError("Enter flag!");
-                    entertask.requestFocus();
-
-                } else {
-
-                    if(text_word.equals(task.getAnswer())){
-
-                        userReference.setValue(Integer.parseInt(oldscore) + Integer.parseInt(task.getPoints()));
+                        Toast toast = Toast.makeText(getContext(), "You already submitted flag for this task!", Toast.LENGTH_SHORT);
+                        toast.show();
 
                     }
                 }
+            });
+        }
 
-                b.dismiss();
+        public void showTaskDialog (Task task){
 
-            }
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+            LayoutInflater layoutInflater = getLayoutInflater();
+            final View dialogView = layoutInflater.inflate(R.layout.task_dialog, null);
+            dialogBuilder.setView(dialogView);
 
-        });
+            final EditText entertask = dialogView.findViewById(R.id.enterflag);
+            final TextView tasktext = dialogView.findViewById(R.id.task_text);
+            final Button submitflag = dialogView.findViewById(R.id.submit);
 
+            tasktext.setText(task.getTask());
+
+            dialogBuilder.setTitle(task.getTitle());
+            final AlertDialog b = dialogBuilder.create();
+            b.show();
+
+            submitflag.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+
+                    String text_word = entertask.getText().toString().trim();
+
+                    if (TextUtils.isEmpty(text_word)) {
+
+                        entertask.setError("Enter flag!");
+                        entertask.requestFocus();
+
+                    } else {
+
+                        if (text_word.equals(task.getAnswer())) {
+
+                            userReference.setValue(Integer.parseInt(oldscore) + Integer.parseInt(task.getPoints()));
+                            String h = sharedPreferencecompleted.getString(ID_COMPLETED, "");
+                            SharedPreferences.Editor es = sharedPreferencecompleted.edit();
+                            es.putString(ID_COMPLETED, h + " " + task.getTitle());
+                            es.commit();
+
+                            Toast toast = Toast.makeText(getContext(), "Right flag!", Toast.LENGTH_SHORT);
+                            toast.show();
+
+                        } else {
+
+                            Toast toast = Toast.makeText(getContext(), "Wrong flag! Try again!", Toast.LENGTH_SHORT);
+                            toast.show();
+
+                        }
+                    }
+
+                    b.dismiss();
+
+                }
+
+            });
+
+        }
     }
 
-}
 
 class Task {
     String title = "";
